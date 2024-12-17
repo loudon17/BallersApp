@@ -8,10 +8,11 @@
 import SwiftUI
 
 @main
-struct BallersAppApp: App {
+struct BallersApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            PlayerListView()
         }
     }
 }
+
