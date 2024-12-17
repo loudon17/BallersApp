@@ -73,6 +73,7 @@ class PlayerViewModel: ObservableObject {
             DispatchQueue.main.async {
                 self?.isLoading = false
                 
+                // Handle network or request errors
                 if let error = error {
                     self?.errorMessage = error.localizedDescription
                     return
@@ -84,8 +85,15 @@ class PlayerViewModel: ObservableObject {
                 }
 
                 do {
+                    // Decode the response data
                     let decodedResponse = try JSONDecoder().decode(PlayerResponse.self, from: data)
-                    self?.playerGroups = decodedResponse.response.list
+                    
+                    // Check if the list of players is empty or missing
+                    if decodedResponse.response.list.isEmpty {
+                        self?.errorMessage = "No players found for this team"
+                    } else {
+                        self?.playerGroups = decodedResponse.response.list
+                    }
                 } catch {
                     self?.errorMessage = "Decoding error: \(error.localizedDescription)"
                 }
@@ -100,6 +108,8 @@ class PlayerViewModel: ObservableObject {
     func dismissKeyboard() {
         UIApplication.shared.windows.first(where: { $0.isKeyWindow })?.endEditing(true)
     }
+
+
 
 }
 

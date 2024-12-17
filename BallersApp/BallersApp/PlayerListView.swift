@@ -6,6 +6,8 @@
 //
 import SwiftUI
 
+
+
 struct PlayerListView: View {
     @StateObject private var viewModel = PlayerViewModel()
     @State private var teamID: String = ""  // Holds team ID input
@@ -45,18 +47,21 @@ struct PlayerListView: View {
                         ForEach(viewModel.playerGroups, id: \.title) { group in
                             Section(header: Text(group.title.capitalized)) {
                                 ForEach(group.members) { player in
-                                    HStack {
-                                        VStack(alignment: .leading) {
-                                            Text(player.name)
-                                                .font(.headline)
-                                            Text(player.cname ?? "Unknown Country")
-                                                .font(.subheadline)
-                                                .foregroundColor(.gray)
-                                        }
-                                        Spacer()
-                                        if let rating = player.rating {
-                                            Text(String(format: "%.2f", rating))
-                                                .foregroundColor(.blue)
+                                    // Add NavigationLink to PlayerDetailView
+                                    NavigationLink(destination: PlayerDetailView(playerID: player.id)) {
+                                        HStack {
+                                            VStack(alignment: .leading) {
+                                                Text(player.name)
+                                                    .font(.headline)
+                                                Text(player.cname ?? "Unknown Country")
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.gray)
+                                            }
+                                            Spacer()
+                                            if let rating = player.rating {
+                                                Text(String(format: "%.2f", rating))
+                                                    .foregroundColor(.blue)
+                                            }
                                         }
                                     }
                                 }
@@ -70,3 +75,18 @@ struct PlayerListView: View {
     }
 }
 
+
+struct PlayerRow: View {
+    var player: Player
+
+    var body: some View {
+        NavigationLink(destination: PlayerDetailView(playerID: player.id)) {
+            HStack {
+                Text(player.name)
+                    .font(.headline)
+                Spacer()
+            }
+            .padding()
+        }
+    }
+}
