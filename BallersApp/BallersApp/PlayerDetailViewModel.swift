@@ -32,39 +32,27 @@ struct PlayerDetailValue: Codable {
     let key: String?
     let fallback: String?
     let options: [String: String]?
-    
+
     // Custom initializer to handle different JSON formats for 'value'
     init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        // Try to decode numberValue first (for cases like Height, Age, Market value)
+        self.numberValue = try? container.decode(Double.self, forKey: .numberValue)
         
-        // Try to decode as a dictionary with 'numberValue' and other fields
-        if let dict = try? container.decode([String: String].self) {
-            self.numberValue = nil
-            self.key = dict["key"]
-            self.fallback = dict["fallback"]
-            self.options = dict
-        }
-        // Try to decode as a number (for values like "height", "age", etc.)
-        else if let numberValue = try? container.decode(Double.self) {
-            self.numberValue = numberValue
-            self.key = nil
-            self.fallback = nil
-            self.options = nil
-        }
-        // Try to decode as a string
-        else if let fallback = try? container.decode(String.self) {
-            self.fallback = fallback
-            self.numberValue = nil
-            self.key = nil
-            self.options = nil
-        } else {
-            self.numberValue = nil
-            self.key = nil
-            self.fallback = nil
-            self.options = nil
-        }
+        // Decode key and fallback (for cases like Preferred foot and Country)
+        self.key = try? container.decode(String.self, forKey: .key)
+        self.fallback = try? container.decode(String.self, forKey: .fallback)
+
+        // Decode options (for cases with units or currency style)
+        self.options = try? container.decode([String: String].self, forKey: .options)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case numberValue, key, fallback, options
     }
 }
+
 
 
 
@@ -105,6 +93,7 @@ class PlayerDetailViewModel: ObservableObject {
                 }
 
                 do {
+                    // Decode the response correctly
                     let decodedResponse = try JSONDecoder().decode(PlayerDetailResponse.self, from: data)
                     self?.playerDetails = decodedResponse.response.detail
                 } catch {

@@ -5,6 +5,7 @@
 //  Created by Luigi Donnino on 17/12/24.
 //
 import SwiftUI
+import Foundation
 
 struct PlayerDetailView: View {
     @StateObject private var viewModel = PlayerDetailViewModel()
@@ -24,34 +25,23 @@ struct PlayerDetailView: View {
                             .font(.headline)
                             .frame(width: 120, alignment: .leading)
                         Spacer()
-
-                        // Handle numberValue with different options like currency and unit
+                        
                         if let numberValue = detail.value.numberValue {
-                            // Handle currency format
+                            // Format number if it's currency or unit
                             if let options = detail.value.options, options["style"] == "currency" {
-                                let currency = options["currency"] ?? ""
-                                Text("\(currency) \(numberValue, specifier: "%.1f")")
+                                Text("\(numberValue, specifier: "%.1f")")
                                     .font(.body)
-                            }
-                            // Handle unit format
-                            else if let options = detail.value.options, options["style"] == "unit" {
-                                let unit = options["unit"] ?? ""
-                                Text("\(numberValue, specifier: "%.0f") \(unit)")
+                            } else if let options = detail.value.options, options["style"] == "unit" {
+                                Text("\(numberValue, specifier: "%.0f") \(options["unit"] ?? "")")
                                     .font(.body)
-                            }
-                            // Handle plain number format
-                            else {
+                            } else {
                                 Text("\(numberValue, specifier: "%.0f")")
                                     .font(.body)
                             }
-                        }
-                        // Handle key as a string (e.g., Left, Greece)
-                        else if let key = detail.value.key {
+                        } else if let key = detail.value.key {
                             Text(key)
                                 .font(.body)
-                        }
-                        // Handle fallback string (e.g., "Greece", "Left")
-                        else if let fallback = detail.value.fallback {
+                        } else if let fallback = detail.value.fallback {
                             Text(fallback)
                                 .font(.body)
                         }
@@ -65,4 +55,5 @@ struct PlayerDetailView: View {
         .navigationTitle("Player Details")
     }
 }
+
 
