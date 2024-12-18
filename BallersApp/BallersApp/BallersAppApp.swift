@@ -9,11 +9,30 @@ import SwiftUI
 
 @main
 struct BallersApp: App {
+    @StateObject private var favoritesManager = FavoritesManager()
+
     var body: some Scene {
         WindowGroup {
-            PlayerListView()
+            TabView {
+                NavigationView {
+                    PlayerListView()
+                        .environmentObject(favoritesManager)
+                }
+                .tabItem {
+                    Label("Players", systemImage: "list.bullet")
+                }
+
+                NavigationView {
+                    FavoritesView()
+                        .environmentObject(favoritesManager)
+                }
+                .tabItem {
+                    Label("Favorites", systemImage: "star.fill")
+                }
+            }
         }
     }
 }
+
 
 

@@ -4,23 +4,22 @@
 //
 //  Created by Luigi Donnino on 16/12/24.
 //
+
 import SwiftUI
-
-
 
 struct PlayerListView: View {
     @StateObject private var viewModel = PlayerViewModel()
-    @State private var teamID: String = ""  // Holds team ID input
+    @State private var teamID: String = ""
+    @EnvironmentObject var favoritesManager: FavoritesManager
 
     var body: some View {
         NavigationView {
             VStack {
-                // Search Bar
                 HStack {
                     TextField("Enter Team ID", text: $teamID)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .keyboardType(.numberPad)
-                    
+
                     Button(action: {
                         if let id = Int(teamID), id > 0 {
                             viewModel.fetchPlayers(for: id)
@@ -35,8 +34,7 @@ struct PlayerListView: View {
                     }
                 }
                 .padding()
-                
-                // Player List or Loading/Error Views
+
                 if viewModel.isLoading {
                     ProgressView("Loading...")
                 } else if let errorMessage = viewModel.errorMessage {
@@ -47,9 +45,8 @@ struct PlayerListView: View {
                         ForEach(viewModel.playerGroups, id: \.title) { group in
                             Section(header: Text(group.title.capitalized)) {
                                 ForEach(group.members) { player in
-                                    // Add NavigationLink to PlayerDetailView
-                                    NavigationLink(destination: PlayerDetailView(playerID: player.id)) {
-                                        HStack {
+                                    HStack {
+                                        NavigationLink(destination: PlayerDetailView(playerID: player.id)) {
                                             VStack(alignment: .leading) {
                                                 Text(player.name)
                                                     .font(.headline)
@@ -57,12 +54,20 @@ struct PlayerListView: View {
                                                     .font(.subheadline)
                                                     .foregroundColor(.gray)
                                             }
-                                            Spacer()
-                                            if let rating = player.rating {
-                                                Text(String(format: "%.2f", rating))
-                                                    .foregroundColor(.blue)
-                                            }
                                         }
+                                        Spacer()
+
+                                        Button(action: {
+                                            if favoritesManager.isFavorite(player) {
+                                                favoritesManager.removeFavorite(player)
+                                            } else {
+                                                favoritesManager.addFavorite(player)
+                                            }
+                                        }) {
+                                            Image(systemName: favoritesManager.isFavorite(player) ? "star.fill" : "star")
+                                                .foregroundColor(.yellow)
+                                        }
+                                        .buttonStyle(BorderlessButtonStyle())
                                     }
                                 }
                             }
@@ -70,23 +75,19 @@ struct PlayerListView: View {
                     }
                 }
             }
-            .navigationTitle("Search Team Players")
+            .navigationTitle("Ballers")
+            
+            
+            
         }
     }
 }
 
-
-struct PlayerRow: View {
-    var player: Player
-
-    var body: some View {
-        NavigationLink(destination: PlayerDetailView(playerID: player.id)) {
-            HStack {
-                Text(player.name)
-                    .font(.headline)
-                Spacer()
-            }
-            .padding()
-        }
+// PreviewProvider for PlayerListView
+struct PlayerListView_Previews: PreviewProvider {
+    static var previews: some View {
+        PlayerListView()
+            .environmentObject(FavoritesManager()) // Pass environment object for testing
     }
 }
+
